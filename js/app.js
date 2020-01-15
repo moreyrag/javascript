@@ -3,27 +3,37 @@ var Calculadora = {
   v_teclas: ["0", "1", "3", "4", "5", "6", "7", "8", "9", "on", "sign", "dividido", "por", "menos", "punto", "igual", "mas"],
   v_num1:null,
   v_num2:null,
+  v_tecla_actual:null,
   v_registrar_num1:true,
   init: function(){
-	this.v_teclas.forEach(this.agregaListenerEventoClick)
+	   this.v_teclas.forEach(this.agregaListenerEventoClick)
   },
   agregaListenerEventoClick: function(id){
-	document.getElementById(id).addEventListener('click', console.log("Hola"))
+  	document.getElementById(id).addEventListener('click',
+      /*
+      function () {
+        this.registrarTecla
+        this.v_tecla_actual=id;
+        console.log(this.v_tecla_actual);
+        registrarTecla;
+      }
+      */
+      alert(id);
+    );
   },
-  registrarTecla:function(id){
-	this.v_num1 = v_num1 + id;
-	this.imprimirDisplay(this.v_num1)
+  registrarTecla:function (){
+  	 return this.v_tecla_actual;
   },
   operacion: function (num1, num2){
-	return {
-		on:0,
-		sign: -num1,
-		dividido: num1 / num2,
-		por: num1 * num2,
-		menos:num1 - num2,
-		mas: num1 + num2,
-		resta: num1 - num2
-	}
+  	return {
+  		on:0,
+  		sign: -num1,
+  		dividido: num1 / num2,
+  		por: num1 * num2,
+  		menos:num1 - num2,
+  		mas: num1 + num2,
+  		resta: num1 - num2
+  	}
   },
   imprimirDisplay: function(num){
     document.getElementById("display").innerHTML=num;
@@ -81,5 +91,3 @@ v_display.addEventListener("click",function(event){
 	console.log(this.v_digitos_num1.length)
 	})
     */
-	
-
