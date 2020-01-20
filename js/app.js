@@ -1,28 +1,33 @@
 var Calculadora = {
-  v_num_display:0,
-  v_teclas: ["0", "1", "3", "4", "5", "6", "7", "8", "9", "on", "sign", "dividido", "por", "menos", "punto", "igual", "mas"],
+  v_teclas: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "on", "sign", "dividido", "por", "menos", "punto", "igual", "mas"],
+  v_display:"0",
   v_num1:null,
   v_num2:null,
-  v_tecla_actual:null,
-  v_registrar_num1:true,
+  v_tecla_actual:"0",
+  v_sesion_stg:window.sessionStorage,
   init: function(){
-	   this.v_teclas.forEach(this.agregaListenerEventoClick)
+	   this.asignarEventoClickTeclas();
   },
-  agregaListenerEventoClick: function(id){
-  	document.getElementById(id).addEventListener('click',
-      /*
-      function () {
-        this.registrarTecla
-        this.v_tecla_actual=id;
-        console.log(this.v_tecla_actual);
-        registrarTecla;
-      }
-      */
-      alert(id);
-    );
+  asignarEventoClickTeclas:function (){
+    for (var i = 0; i < this.v_teclas.length; i++) {
+      document.getElementById(this.v_teclas[i]).onclick=this.registrarTecla;
+    }
   },
-  registrarTecla:function (){
-  	 return this.v_tecla_actual;
+  registrarTecla:function (event){
+    if (isNaN(Number(event.target.id))) {alert("op");} else {alert("num")};
+    /*
+    switch (event.target.id) {
+      case "on":
+        this.v_display="0";
+        this.imprimirDisplay(this.v_display);
+        break;
+      case "sign":
+        this.v_display="0";
+        this.imprimirDisplay(this.v_display);
+        break;
+      default:
+    }
+    */
   },
   operacion: function (num1, num2){
   	return {
