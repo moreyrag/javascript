@@ -1,9 +1,11 @@
 var Calculadora = {
   v_teclas: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "on", "sign", "dividido", "por", "menos", "punto", "igual", "mas"],
   v_display:"0",
-  v_num1:null,
-  v_num2:null,
-  v_tecla_actual:"0",
+  v_num1:"0",
+  v_num2:"0",
+  v_largo_num1:0,
+  v_largo_num2:0,
+  v_ingresar_num1:true,
   v_sesion_stg:window.sessionStorage,
   init: function(){
 	   this.asignarEventoClickTeclas();
@@ -14,20 +16,38 @@ var Calculadora = {
     }
   },
   registrarTecla:function (event){
-    if (isNaN(Number(event.target.id))) {alert("op");} else {alert("num")};
-    /*
-    switch (event.target.id) {
-      case "on":
-        this.v_display="0";
-        this.imprimirDisplay(this.v_display);
-        break;
-      case "sign":
-        this.v_display="0";
-        this.imprimirDisplay(this.v_display);
-        break;
-      default:
-    }
-    */
+    if (isNaN(Number(event.target.id))) {
+        // alert("op");
+        switch (event.target.id) {
+          case "on":
+            this.v_display="0";
+            this.v_num1=null;
+            this.v_num2=null;
+            this.v_largo_num1=0;
+            this.v_largo_num2=0;
+            this.v_ingresar_num1=true;
+            v_sesion_stg.num="0";
+            this.imprimirDisplay(this.v_display);
+            break;
+          case "sign":
+            this.v_display="0";
+            this.imprimirDisplay(this.v_display);
+            break;
+          default:
+        }
+    } else {
+      // alert("num")
+      if (this.v_ingresar_num1 && this.v_largo_num1 < 8 && this.v_num1!="0"){
+        this.v_num1=this.v_num1+event.target.id;
+        this.v_largo_num1++;
+        alert("v_num1:" + this.v_num1);
+      }
+      else if (this.v_largo_num2 < 8 && this.v_num2!="0") {
+        this.v_num2=this.v_num2+event.target.id;
+        this.v_largo_num2++;
+        alert("v_num2:" + this.v_num2);
+      }
+    };
   },
   operacion: function (num1, num2){
   	return {
