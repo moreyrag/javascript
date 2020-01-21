@@ -1,42 +1,98 @@
 var Calculadora = {
   v_teclas: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "on", "sign", "dividido", "por", "menos", "punto", "igual", "mas"],
-  v_display:"0",
-  v_num1:"0",
-  v_num2:"0",
-  v_largo_num1:0,
-  v_largo_num2:0,
-  v_ingresar_num1:true,
-  v_sesion_stg:window.sessionStorage,
+  v_ingresar_num2:false,
   init: function(){
+     sessionStorage.setItem('num1',null);
+     sessionStorage.setItem('num2',null);
+     sessionStorage.setItem('oper',null);
+     sessionStorage.setItem('result',"0");
 	   this.asignarEventoClickTeclas();
+  },
+  imprimirDisplay: function(num){
+    document.getElementById("display").innerHTML=num;
   },
   asignarEventoClickTeclas:function (){
     for (var i = 0; i < this.v_teclas.length; i++) {
-      document.getElementById(this.v_teclas[i]).onclick=this.registrarTecla;
+      document.getElementById(this.v_teclas[i]).onclick=this.registrarTecla.bind(this);
     }
   },
   registrarTecla:function (event){
-    if (isNaN(Number(event.target.id))) {
+    var num1 =JSON.parse(sessionStorage.getItem('num1'));
+    var num2 =JSON.parse(sessionStorage.getItem('num2'));
+    var oper_anterior =JSON.parse(sessionStorage.getItem('oper'));
+    var oper = event.target.id;
+    var result =JSON.parse(sessionStorage.getItem('result'));
+    if (isNaN(Number(oper))) {
         // alert("op");
-        switch (event.target.id) {
+        sessionStorage.setItem('oper',oper);
+        switch (oper) {
           case "on":
-            this.v_display="0";
-            this.v_num1=null;
-            this.v_num2=null;
-            this.v_largo_num1=0;
-            this.v_largo_num2=0;
-            this.v_ingresar_num1=true;
-            v_sesion_stg.num="0";
-            this.imprimirDisplay(this.v_display);
+            sessionStorage.setItem('num1',null);
+            sessionStorage.setItem('num2',null);
+            sessionStorage.setItem('oper',null);
+            sessionStorage.setItem('result',"0");
             break;
           case "sign":
-            this.v_display="0";
-            this.imprimirDisplay(this.v_display);
+            if (!v_ingresar_num2){
+              if (!num1 || num1 ==="0") {
+                sessionStorage.setItem('result',"0");
+              } else {
+                sessionStorage.setItem('result',"-"+num1);
+                sessionStorage.setItem('num1',"-"+num1);
+              }
+            }
+            else {
+              if (!num2 || num2 ==="0") {
+                sessionStorage.setItem('result',"0");
+              } else {
+                sessionStorage.setItem('result',"-"+num2);
+                sessionStorage.setItem('num2',"-"+num2);
+              }
+            }
             break;
+          case "dividido":
+              v_ingresar_num2 = true;
+              sessionStorage.setItem('result',"0");
+              sessionStorage.setItem('num2',null);
+              break;
+          case "por":
+              v_ingresar_num2 = true;
+              sessionStorage.setItem('result',"0");
+              sessionStorage.setItem('num2',null);
+              break;
+          case "menos":
+              v_ingresar_num2 = true;
+              sessionStorage.setItem('result',"0");
+              sessionStorage.setItem('num2',null);
+              break;
+          case "punto":
+              if (!v_ingresar_num2){
+                sessionStorage.setItem('result',num1+".");
+                sessionStorage.setItem('num1',num1+".");
+              }
+              else{
+                sessionStorage.setItem('result',num2+".");
+                sessionStorage.setItem('num2',num2+".");
+              }
+              break;
+          case "igual":
+              // click en el igual sin
+              if (!v_ingresar_num2 && (oper_anterior == "mas" || oper_anterior == "menos" || oper_anterior=="mas" || oper_anterior="dividido")){
+                result = this.operacion(num1, )
+                sessionStorage.setItem('result',this.operacion());
+              }
+
+              v_ingresar_num2 = false;
+
+
+              break;
           default:
         }
+
+        this.imprimirDisplay(JSON.parse(sessionStorage.getItem('num1')));
     } else {
-      // alert("num")
+      alert("num")
+      /*
       if (this.v_ingresar_num1 && this.v_largo_num1 < 8 && this.v_num1!="0"){
         this.v_num1=this.v_num1+event.target.id;
         this.v_largo_num1++;
@@ -47,7 +103,8 @@ var Calculadora = {
         this.v_largo_num2++;
         alert("v_num2:" + this.v_num2);
       }
-    };
+      */
+    }
   },
   operacion: function (num1, num2){
   	return {
@@ -59,9 +116,6 @@ var Calculadora = {
   		mas: num1 + num2,
   		resta: num1 - num2
   	}
-  },
-  imprimirDisplay: function(num){
-    document.getElementById("display").innerHTML=num;
   }
 }
 
