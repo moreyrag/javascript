@@ -1,12 +1,27 @@
 var Calculadora = {
   v_teclas: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "on", "sign", "dividido", "por", "menos", "punto", "igual", "mas"],
-  v_ingresar_num2:false,
+  self:"",
   init: function(){
-     sessionStorage.setItem('num1',null);
-     sessionStorage.setItem('num2',null);
-     sessionStorage.setItem('oper',null);
-     sessionStorage.setItem('result',"0");
-	   this.asignarEventoClickTeclas();
+     self = this;
+     this.resetear();
+     this.asignarEventoClickTeclas();
+  },
+  resetear:function () {
+    sessionStorage.setItem('num1',0);
+    sessionStorage.setItem('num2',0);
+    sessionStorage.setItem('largo_num1',0);
+    sessionStorage.setItem('largo_num2',0);
+    sessionStorage.setItem('oper',false);
+    sessionStorage.setItem('tecla',0);
+    sessionStorage.setItem('resultado',0);
+    sessionStorage.setItem('cant_ops',0);
+
+    sessionStorage.setItem('ingresando_num1',true);
+    sessionStorage.setItem('ingresando_num2',false);
+    sessionStorage.setItem('ingresando_op',false);
+    sessionStorage.setItem('calculando',false);
+
+    this.imprimirDisplay("0");
   },
   imprimirDisplay: function(num){
     document.getElementById("display").innerHTML=num;
@@ -17,156 +32,323 @@ var Calculadora = {
     }
   },
   registrarTecla:function (event){
-    var num1 =JSON.parse(sessionStorage.getItem('num1'));
-    var num2 =JSON.parse(sessionStorage.getItem('num2'));
-    var oper_anterior =JSON.parse(sessionStorage.getItem('oper'));
-    var oper = event.target.id;
-    var result =JSON.parse(sessionStorage.getItem('result'));
-    if (isNaN(Number(oper))) {
-        // alert("op");
-        sessionStorage.setItem('oper',oper);
-        switch (oper) {
-          case "on":
-            sessionStorage.setItem('num1',null);
-            sessionStorage.setItem('num2',null);
-            sessionStorage.setItem('oper',null);
-            sessionStorage.setItem('result',"0");
-            break;
-          case "sign":
-            if (!v_ingresar_num2){
-              if (!num1 || num1 ==="0") {
-                sessionStorage.setItem('result',"0");
-              } else {
-                sessionStorage.setItem('result',"-"+num1);
-                sessionStorage.setItem('num1',"-"+num1);
-              }
-            }
-            else {
-              if (!num2 || num2 ==="0") {
-                sessionStorage.setItem('result',"0");
-              } else {
-                sessionStorage.setItem('result',"-"+num2);
-                sessionStorage.setItem('num2',"-"+num2);
-              }
-            }
-            break;
-          case "dividido":
-              v_ingresar_num2 = true;
-              sessionStorage.setItem('result',"0");
-              sessionStorage.setItem('num2',null);
-              break;
-          case "por":
-              v_ingresar_num2 = true;
-              sessionStorage.setItem('result',"0");
-              sessionStorage.setItem('num2',null);
-              break;
-          case "menos":
-              v_ingresar_num2 = true;
-              sessionStorage.setItem('result',"0");
-              sessionStorage.setItem('num2',null);
-              break;
-          case "punto":
-              if (!v_ingresar_num2){
-                sessionStorage.setItem('result',num1+".");
-                sessionStorage.setItem('num1',num1+".");
-              }
-              else{
-                sessionStorage.setItem('result',num2+".");
-                sessionStorage.setItem('num2',num2+".");
-              }
-              break;
-          case "igual":
-              // click en el igual sin
-              if (!v_ingresar_num2 && (oper_anterior == "mas" || oper_anterior == "menos" || oper_anterior=="mas" || oper_anterior="dividido")){
-                result = this.operacion(num1, )
-                sessionStorage.setItem('result',this.operacion());
-              }
+    sessionStorage.setItem('tecla',event.target.id);
+    // this.leerTeclas(this.calcularOperacion(this.imprimirDisplay));
+    this.leerTeclas();
+  },
+  leerTeclas:function () {
+    // this.leerNum1(this.leerOperacion(this.leerNum2));
+    this.leerNum(this.leerOperacion);
+  },
+  leerNum:function (fLeerOperacion) {
+    var v_str_num1 =sessionStorage.getItem('num1');
+    var v_str_num2 =sessionStorage.getItem('num2');
+    var v_num1 = Number(v_str_num1);
+    var v_num2 = Number(v_str_num2);
+    var v_largo_num1 = JSON.parse(sessionStorage.getItem('largo_num1'));
+    var v_largo_num2 = JSON.parse(sessionStorage.getItem('largo_num2'));
+    var v_oper =sessionStorage.getItem('oper');
+    var v_tecla = sessionStorage.getItem('tecla');
+    var v_str_resultado = sessionStorage.getItem('resultado');
+    var v_resultado = Number(v_str_resultado);
+    var v_cant_ops = JSON.parse(sessionStorage.getItem('cant_ops'));
 
-              v_ingresar_num2 = false;
+    var v_ingresando_num1 = JSON.parse(sessionStorage.getItem('ingresando_num1'));
+    var v_ingresando_num2 = JSON.parse(sessionStorage.getItem('ingresando_num2'));
+    var v_ingresando_op = JSON.parse(sessionStorage.getItem('ingresando_op'));
+    var v_calculando = JSON.parse(sessionStorage.getItem('calculando'));
 
+    if (v_tecla==="on"){this.resetear();return;}
 
-              break;
-          default:
+    if (v_tecla==="igual"){
+      sessionStorage.setItem('calculando',true);
+      sessionStorage.setItem('ingresando_op',false);
+      return;
+    }
+
+    if (isNaN(Number(v_tecla)) && v_tecla != "punto" && v_tecla != "sign") {
+      sessionStorage.setItem('calculando',false);
+      sessionStorage.setItem('ingresando_op',true);
+      if (v_ingresando_num1) {
+        sessionStorage.setItem('ingresando_num1',false);
+        sessionStorage.setItem('ingresando_num2',true);
+      }
+      else {
+        sessionStorage.setItem('ingresando_num1',true);
+        sessionStorage.setItem('ingresando_num2',false);
+      }
+      fLeerOperacion();
+      return;
+    }
+    else {
+      sessionStorage.setItem('calculando',false);
+      sessionStorage.setItem('ingresando_op',false);
+    }
+
+    if (v_tecla === "sign"){
+      if (v_ingresando_num1){
+        v_num1 = v_num1*(-1);
+        v_str_resultado = v_num1.toString();
+        sessionStorage.setItem('num1',v_str_resultado);
+        sessionStorage.setItem('resultado',v_str_resultado);
+        this.imprimirDisplay(v_str_resultado);
+      }
+      if (v_ingresando_num2){
+        v_num2 = v_num2*(-1);
+        v_str_resultado = v_num2.toString();
+        sessionStorage.setItem('num2',v_str_resultado);
+        sessionStorage.setItem('resultado',v_str_resultado);
+        this.imprimirDisplay(v_str_resultado);
+      }
+      return;
+    }
+
+    if (v_tecla === "punto"){
+      if (v_ingresando_num1) {
+        if (v_str_num1 === "0") {v_largo_num1++;}
+        if (!v_str_num1.includes(".")){v_str_num1 = v_str_num1+".";}
+        sessionStorage.setItem('num1',v_str_num1);
+        sessionStorage.setItem('largo_num1',v_largo_num1);
+        this.imprimirDisplay(v_str_num1);
+      }
+      if (v_ingresando_num2) {
+        if (v_str_num2 === "0") {v_largo_num2++;}
+        if (!v_str_num2.includes(".")){v_str_num2 = v_str_num2+".";}
+        sessionStorage.setItem('num2',v_str_num2);
+        sessionStorage.setItem('largo_num2',v_largo_num2);
+        this.imprimirDisplay(v_str_num2);
+      }
+    }
+    else {
+      if (v_ingresando_num1 && v_str_num1 == "0" && v_tecla === "0") {this.imprimirDisplay("0");return;}
+      if (v_ingresando_num2 && v_str_num2 == "0" && v_tecla === "0") {this.imprimirDisplay("0");return;}
+
+      if (v_largo_num1 < 8 && v_ingresando_num1){
+        if (v_str_num1==="0"){
+          sessionStorage.setItem('num1',v_tecla);
+          this.imprimirDisplay(v_tecla);
         }
+        else {
+          sessionStorage.setItem('num1',v_str_num1+v_tecla);
+          this.imprimirDisplay(v_str_num1+v_tecla);
+        }
+        sessionStorage.setItem('largo_num1',v_largo_num1 + 1);
+      }
+      else {
+        sessionStorage.setItem('ingresando_num1',false);
+      }
 
-        this.imprimirDisplay(JSON.parse(sessionStorage.getItem('num1')));
-    } else {
-      alert("num")
-      /*
-      if (this.v_ingresar_num1 && this.v_largo_num1 < 8 && this.v_num1!="0"){
-        this.v_num1=this.v_num1+event.target.id;
-        this.v_largo_num1++;
-        alert("v_num1:" + this.v_num1);
+      if (v_largo_num2 < 8 && v_ingresando_num2){
+        if (v_str_num2==="0"){
+          sessionStorage.setItem('num2',v_tecla);
+          this.imprimirDisplay(v_tecla);
+        }
+        else {
+          sessionStorage.setItem('num2',v_str_num2+v_tecla);
+          this.imprimirDisplay(v_str_num2+v_tecla);
+        }
+        sessionStorage.setItem('largo_num2',v_largo_num2 + 1);
       }
-      else if (this.v_largo_num2 < 8 && this.v_num2!="0") {
-        this.v_num2=this.v_num2+event.target.id;
-        this.v_largo_num2++;
-        alert("v_num2:" + this.v_num2);
+      else {
+        sessionStorage.setItem('ingresando_num2',false);
       }
-      */
     }
   },
-  operacion: function (num1, num2){
-  	return {
-  		on:0,
-  		sign: -num1,
-  		dividido: num1 / num2,
-  		por: num1 * num2,
-  		menos:num1 - num2,
-  		mas: num1 + num2,
-  		resta: num1 - num2
-  	}
+  leerOperacion: function () {
+    var v_str_num1 =sessionStorage.getItem('num1');
+    var v_str_num2 =sessionStorage.getItem('num2');
+    var v_num1 = Number(v_str_num1);
+    var v_num2 = Number(v_str_num2);
+    var v_largo_num1 = JSON.parse(sessionStorage.getItem('largo_num1'));
+    var v_largo_num2 = JSON.parse(sessionStorage.getItem('largo_num2'));
+    var v_oper =sessionStorage.getItem('oper');
+    var v_tecla = sessionStorage.getItem('tecla');
+    var v_str_resultado = sessionStorage.getItem('resultado');
+    var v_resultado = Number(v_str_resultado);
+    var v_cant_ops = JSON.parse(sessionStorage.getItem('cant_ops'));
+
+    var v_ingresando_num1 = JSON.parse(sessionStorage.getItem('ingresando_num1'));
+    var v_ingresando_num2 = JSON.parse(sessionStorage.getItem('ingresando_num2'));
+    var v_ingresando_op = JSON.parse(sessionStorage.getItem('ingresando_op'));
+    var v_calculando = JSON.parse(sessionStorage.getItem('calculando'));
+
+    if (v_ingresando_op) {
+      sessionStorage.setItem('oper',v_tecla);
+    }
+
+    this.self.calcularOperacion();
+  },
+  calcularOperacion:function () {
+    var v_str_num1 =sessionStorage.getItem('num1');
+    var v_str_num2 =sessionStorage.getItem('num2');
+    var v_num1 = Number(v_str_num1);
+    var v_num2 = Number(v_str_num2);
+    var v_largo_num1 = JSON.parse(sessionStorage.getItem('largo_num1'));
+    var v_largo_num2 = JSON.parse(sessionStorage.getItem('largo_num2'));
+    var v_oper =sessionStorage.getItem('oper');
+    var v_tecla = sessionStorage.getItem('tecla');
+    var v_str_resultado = sessionStorage.getItem('resultado');
+    var v_resultado = Number(v_str_resultado);
+    var v_cant_ops = JSON.parse(sessionStorage.getItem('cant_ops'));
+
+    var v_ingresando_num1 = JSON.parse(sessionStorage.getItem('ingresando_num1'));
+    var v_ingresando_num2 = JSON.parse(sessionStorage.getItem('ingresando_num2'));
+    var v_ingresando_op = JSON.parse(sessionStorage.getItem('ingresando_op'));
+    var v_calculando = JSON.parse(sessionStorage.getItem('calculando'));
+
+    /*
+    var v_num1 =sessionStorage.getItem('num1');
+    var v_num2 =sessionStorage.getItem('num2');
+    var v_largo_num1 = JSON.parse(sessionStorage.getItem('largo_num1'));
+    var v_largo_num2 = JSON.parse(sessionStorage.getItem('largo_num2'));
+    var v_ingresando_num1 = JSON.parse(sessionStorage.getItem('ingresando_num1'));
+    var v_ingresando_num2 = JSON.parse(sessionStorage.getItem('ingresando_num2'));
+    var v_oper = sessionStorage.getItem('oper');
+    var v_calcular = JSON.parse(sessionStorage.getItem('calcular'));
+    var tecla = sessionStorage.getItem('tecla');
+    var v_resultado = sessionStorage.getItem('resultado');
+    var result_num;
+    var v_largo;
+
+    if (v_calcular) {
+      switch (v_oper) {
+        case "sign":
+          if (v_ingresando_num1) {
+            result_num = Number(v_num1)*(-1);
+            v_resultado = result_num.toString();
+            v_largo = v_largo_num1;
+            sessionStorage.setItem('ingresar_num1',true);
+            sessionStorage.setItem('ingresando_num1',true);
+            sessionStorage.setItem('ingresar_num2',false);
+            sessionStorage.setItem('ingresando_num2',false);
+            sessionStorage.setItem('num1',v_resultado);
+            sessionStorage.setItem('num2',0);
+            sessionStorage.setItem('largo_num1',v_largo);
+            sessionStorage.setItem('largo_num2',0);
+          }
+          else {
+            if (v_ingresando_num2){
+              result_num = Number(v_num2)*(-1);
+              v_resultado = result_num.toString();
+              v_largo = v_largo_num2;
+              sessionStorage.setItem('ingresar_num1',false);
+              sessionStorage.setItem('ingresando_num1',false);
+              sessionStorage.setItem('ingresar_num2',true);
+              sessionStorage.setItem('ingresando_num2',true);
+              sessionStorage.setItem('num1',0);
+              sessionStorage.setItem('num2',v_resultado);
+              sessionStorage.setItem('largo_num1',0);
+              sessionStorage.setItem('largo_num2',v_largo);
+            }
+          }
+          break;
+          case "mas":
+            result_num = Number(v_num1) + Number(v_num2);
+            v_resultado = result_num.toString();
+            v_largo = v_resultado.length;
+            if (v_resultado.includes(".")) {
+              v_largo--;
+            }
+            if (v_largo > 8){
+              v_resultado="Infinity";
+              this.resetear();
+            }
+            else {
+              sessionStorage.setItem('ingresar_num1',true);
+              sessionStorage.setItem('ingresando_num1',true);
+              sessionStorage.setItem('ingresar_num2',false);
+              sessionStorage.setItem('ingresando_num2',false);
+              sessionStorage.setItem('num1',v_resultado);
+              sessionStorage.setItem('num2',0);
+              sessionStorage.setItem('largo_num1',v_largo);
+              sessionStorage.setItem('largo_num2',0);
+            }
+            break;
+          case "menos":
+              result_num = Number(v_num1) - Number(v_num2);
+              v_resultado = result_num.toString();
+              v_largo = v_resultado.length;
+              if (v_resultado.includes(".")) {
+                v_largo--;
+              }
+              if (v_largo > 8){
+                v_resultado="Infinity";
+                this.resetear();
+              }
+              else {
+                sessionStorage.setItem('ingresar_num1',true);
+                sessionStorage.setItem('ingresando_num1',true);
+                sessionStorage.setItem('ingresar_num2',false);
+                sessionStorage.setItem('ingresando_num2',false);
+                sessionStorage.setItem('num1',v_resultado);
+                sessionStorage.setItem('num2',0);
+                sessionStorage.setItem('largo_num1',v_largo);
+                sessionStorage.setItem('largo_num2',0);
+              }
+              break;
+          case "por":
+            result_num = Number(v_num1) * Number(v_num2);
+            v_resultado = result_num.toString();
+            v_largo = v_resultado.length;
+            if (v_resultado.includes(".")) {
+              v_largo--;
+            }
+            if (v_largo > 8){
+              v_resultado="Infinity";
+              this.resetear();
+            }
+            else {
+              sessionStorage.setItem('ingresar_num1',true);
+              sessionStorage.setItem('ingresando_num1',true);
+              sessionStorage.setItem('ingresar_num2',false);
+              sessionStorage.setItem('ingresando_num2',false);
+              sessionStorage.setItem('num1',v_resultado);
+              sessionStorage.setItem('num2',0);
+              sessionStorage.setItem('largo_num1',v_largo);
+              sessionStorage.setItem('largo_num2',0);
+            }
+            break;
+            case "dividido":
+              result_num = Number(v_num1) / Number(v_num2);
+              v_resultado = result_num.toString();
+              v_largo = v_resultado.length;
+              if (v_resultado.includes(".")) {
+                v_largo--;
+              }
+
+              if (v_largo > 8){
+                v_resultado="Infinity";
+                this.resetear();
+              }
+              else {
+                if (v_num2==="0") {
+                  v_resultado="Error";
+                  this.resetear();
+                }
+                else {
+                  sessionStorage.setItem('ingresar_num1',true);
+                  sessionStorage.setItem('ingresando_num1',true);
+                  sessionStorage.setItem('ingresar_num2',false);
+                  sessionStorage.setItem('ingresando_num2',false);
+                  sessionStorage.setItem('num1',v_resultado);
+                  sessionStorage.setItem('num2',0);
+                  sessionStorage.setItem('largo_num1',v_largo);
+                  sessionStorage.setItem('largo_num2',0);
+                }
+              }
+              break;
+        default:
+      }
+      sessionStorage.setItem('ingresar_op',false);
+      sessionStorage.setItem('oper',false);
+      sessionStorage.setItem('calcular',false);
+      sessionStorage.setItem('tecla',0);
+      sessionStorage.setItem('resultado',0);
+      this.imprimirDisplay(v_resultado);
+    }
+    */
+    alert("calcular op");
   }
 }
 
 Calculadora.init();
-
-/*
-var v_display = document.getElementById('display');
-v_display.addEventListener("click",function(event){
-  var mensaje = "Hiciste click en display la posicion ->  X: "+event.clientX+" Y: "+event.clientY;
-  console.log(mensaje);
-});
-
-var v_on = document.getElementById('on');
-v_display.addEventListener("click",function(event){
-  var mensaje = "Hiciste click en on la posicion ->  X: "+event.clientX+" Y: "+event.clientY;
-  console.log(mensaje);
-});
-*/
-// parseFloat(5)
-// num.toString()
-// num.toPrecision()
-// String(numero)
-// Number(String)
-
-/*
-  v_largo_valor_display:1,
-  v_str_display:"0",
-  v_teclas_nums: [0,1,2,3,4,5,6,7,8,9],
-  v_id_on: "on",
-  v_id_sign: "sign",
-  v_id_dividido: "dividido",
-  v_id_por: "por",
-  v_id_menos: "menos",
-  v_id_punto: "punto",
-  v_id_igual: "igual",
-  v_id_mas: "mas",
-  v_teclas_op: [this.v_id_mas, this.v_id_menos, this.v_id_por, this.v_id_dividido, this.v_id_sign],
-
-*/
-
-
-    /*
-    var b_mas = document.getElementById("mas")
-    b_mas.addEventListener('click', function () {
-    console.log("click on mas");
-    document.sessionStorage.setItem = JSON.stringify({num1:"0"});
-    this.v_num_display = this.ejecutaOperacion(this.menos, 3, 5);
-    console.log(this.v_num_display);
-	console.log(this.operacion(3,8).sign)
-	this.imprimirDisplay(8)
-	this.imprimirDisplay(this.operacion(3,0).dividido)
-	console.log(this.v_digitos_num1.length)
-	})
-    */
