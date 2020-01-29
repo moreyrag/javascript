@@ -38,9 +38,9 @@ var Calculadora = {
   },
   leerTeclas:function () {
     // this.leerNum1(this.leerOperacion(this.leerNum2));
-    this.leerNum(this.leerOperacion);
+    this.leerNum(this.leerOperacion, this.calcularOperacion);
   },
-  leerNum:function (fLeerOperacion) {
+  leerNum:function (fLeerOperacion, fCalcularOp) {
     var v_str_num1 =sessionStorage.getItem('num1');
     var v_str_num2 =sessionStorage.getItem('num2');
     var v_num1 = Number(v_str_num1);
@@ -62,13 +62,18 @@ var Calculadora = {
 
     if (v_tecla==="igual"){
       sessionStorage.setItem('calculando',true);
-      sessionStorage.setItem('ingresando_op',false);
+      // sessionStorage.setItem('ingresando_op',false);
+      // return;
+      fCalcularOp();
       return;
     }
-
-    if (isNaN(Number(v_tecla)) && v_tecla != "punto" && v_tecla != "sign") {
+    else {
       sessionStorage.setItem('calculando',false);
-      sessionStorage.setItem('ingresando_op',true);
+    }
+
+    if (isNaN(Number(v_tecla)) && v_tecla != "punto" && v_tecla != "sign" && v_tecla != "igual") {
+      sessionStorage.setItem('calculando',false);
+
       if (v_ingresando_num1) {
         sessionStorage.setItem('ingresando_num1',false);
         sessionStorage.setItem('ingresando_num2',true);
@@ -77,11 +82,13 @@ var Calculadora = {
         sessionStorage.setItem('ingresando_num1',true);
         sessionStorage.setItem('ingresando_num2',false);
       }
+
+      sessionStorage.setItem('ingresando_op',true);
       fLeerOperacion();
       return;
     }
     else {
-      sessionStorage.setItem('calculando',false);
+      // sessionStorage.setItem('calculando',false);
       sessionStorage.setItem('ingresando_op',false);
     }
 
@@ -92,6 +99,8 @@ var Calculadora = {
         sessionStorage.setItem('num1',v_str_resultado);
         sessionStorage.setItem('resultado',v_str_resultado);
         this.imprimirDisplay(v_str_resultado);
+
+        sessionStorage.setItem('cant_ops',"1");
       }
       if (v_ingresando_num2){
         v_num2 = v_num2*(-1);
@@ -99,6 +108,8 @@ var Calculadora = {
         sessionStorage.setItem('num2',v_str_resultado);
         sessionStorage.setItem('resultado',v_str_resultado);
         this.imprimirDisplay(v_str_resultado);
+
+        sessionStorage.setItem('cant_ops',"2");
       }
       return;
     }
@@ -110,6 +121,8 @@ var Calculadora = {
         sessionStorage.setItem('num1',v_str_num1);
         sessionStorage.setItem('largo_num1',v_largo_num1);
         this.imprimirDisplay(v_str_num1);
+
+        sessionStorage.setItem('cant_ops',"1");
       }
       if (v_ingresando_num2) {
         if (v_str_num2 === "0") {v_largo_num2++;}
@@ -117,6 +130,8 @@ var Calculadora = {
         sessionStorage.setItem('num2',v_str_num2);
         sessionStorage.setItem('largo_num2',v_largo_num2);
         this.imprimirDisplay(v_str_num2);
+
+        sessionStorage.setItem('cant_ops',"2");
       }
     }
     else {
@@ -133,6 +148,8 @@ var Calculadora = {
           this.imprimirDisplay(v_str_num1+v_tecla);
         }
         sessionStorage.setItem('largo_num1',v_largo_num1 + 1);
+
+        sessionStorage.setItem('cant_ops',"1");
       }
       else {
         sessionStorage.setItem('ingresando_num1',false);
@@ -148,6 +165,8 @@ var Calculadora = {
           this.imprimirDisplay(v_str_num2+v_tecla);
         }
         sessionStorage.setItem('largo_num2',v_largo_num2 + 1);
+
+        sessionStorage.setItem('cant_ops',"2");
       }
       else {
         sessionStorage.setItem('ingresando_num2',false);
@@ -174,9 +193,10 @@ var Calculadora = {
 
     if (v_ingresando_op) {
       sessionStorage.setItem('oper',v_tecla);
+      // this.self.calcularOperacion();
     }
 
-    this.self.calcularOperacion();
+
   },
   calcularOperacion:function () {
     var v_str_num1 =sessionStorage.getItem('num1');
@@ -195,6 +215,39 @@ var Calculadora = {
     var v_ingresando_num2 = JSON.parse(sessionStorage.getItem('ingresando_num2'));
     var v_ingresando_op = JSON.parse(sessionStorage.getItem('ingresando_op'));
     var v_calculando = JSON.parse(sessionStorage.getItem('calculando'));
+
+    var result_num;
+
+    if (v_calculando) {
+      if (v_cant_ops == 0){
+        this.self.resetear();
+        v_str_resultado="0";
+        return;
+      }
+
+      if (v_cant_ops == 1){
+        v_str_resultado = v_str_num1;
+        this.self.resetear();
+        sessionStorage.setItem('resultado',v_str_resultado);
+      }
+
+      if (v_cant_ops == 2){
+        switch (v_oper) {
+          case "mas":
+            result_num = Number(v_num1) + Number(v_num2);
+            v_str_resultado = result_num.toString();
+            this.self.resetear();
+            sessionStorage.setItem('resultado',v_str_resultado);
+            break;
+          default:
+
+        }
+      }
+
+      this.self.imprimirDisplay(v_str_resultado);
+    }
+  }
+}
 
     /*
     var v_num1 =sessionStorage.getItem('num1');
@@ -347,8 +400,5 @@ var Calculadora = {
       this.imprimirDisplay(v_resultado);
     }
     */
-    alert("calcular op");
-  }
-}
 
 Calculadora.init();
